@@ -10,6 +10,10 @@ A 3D bayesian inversion for thermodynamic state using the [VBRc](https://github.
 
 add info
 
+### getting data
+
+add info
+
 ### usage
 
 add info
