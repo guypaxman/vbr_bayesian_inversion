@@ -198,6 +198,7 @@ Vpo_var = diag(Vpo);
 % Extract covariances for chosen sites
 lat_site1 = 78;
 lon_site1 = -42;
+% TO DO: make a function out of this
 start_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*(find(lons==lon_site1)-1)) + 1;
 end_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*find(lons==lon_site1));
 Vpo_site1 = Vpo(start_idx1:end_idx1,:);
