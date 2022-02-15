@@ -4,11 +4,11 @@ function observations = load_data(spatial_sampling)
     %   .vs(lat, lon, depth)  3D shear wave velocity in km/s
     %   .Q(lat, lon, depth)   3D quality factor
     %   .vs_err(lat, lon, depth)  error for each vs measurement
-    %   .Q_err(lat, lon, depth)   error for each Q measurent 
+    %   .Q_err(lat, lon, depth)   error for each Q measurement 
     %
-    %   .lat   1D latitdue array, degrees 
+    %   .lat   1D latitude array, degrees 
     %   .lon   1D longitude array, degrees
-    %   .zs    1D depth array, in km (???)
+    %   .zs    1D depth array, in km
     %%%
     
     % The first set is the tomography model (vs and Q)
@@ -32,7 +32,7 @@ function observations = load_data(spatial_sampling)
     idz = z0:z_res:z1;
     vs = GLAD25_Vs.Vs_Model.Vs(idxlat,idxlon,idz); % km/s
     Q = QL6_Q.QL6_Model.Q(idxlat,idxlon,idz);
-    zs = GLAD25_Vs.Vs_Model.Depth(idz); % remove top 3 slices (10, 20, 30 km)
+    zs = GLAD25_Vs.Vs_Model.Depth(idz); % km
     
     % store in the observations structure
     observations.nlat = length(lats);

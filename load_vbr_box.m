@@ -14,9 +14,9 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     %
     %   .vs_vbr     isotropic shear wave velocity, km/s
     %   .Q_vbr      quality factor
+    %   .T          temperature in degrees celsius
     %   .phi        volumetric melt fraction 
-    %   .T          temperature (kelvin? celsius?)
-    %   .g          log10 of grain size in micrometers(?), 
+    %   .g          log10 of grain size in micrometers 
     %   .qmethod    the anelastic method, string  
     %%%
     
@@ -26,7 +26,7 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     %  Extract the VBR box
     T = unique(params.T);
     phi = unique(params.phi);
-    g = log10(unique(params.gs)); %% log grain size
+    g = log10(unique(params.gs));
     % g = unique(params.gs); %% linear grain size
     nT = length(T);
     nphi = length(phi);
