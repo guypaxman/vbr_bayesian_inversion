@@ -6,7 +6,7 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     % box_file 
     %   file path to box to load, e.g., 'sweep_box.mat'
     % qmethod
-    %   the qmethod to use, e.g., 'xfit_premet'
+    %   the qmethod to use, e.g., 'xfit_premelt'
     %
     % Returns
     % -------
