@@ -6,9 +6,12 @@ function observations = load_data(spatial_sampling)
     %   .vs_err(lat, lon, depth)  error for each vs measurement
     %   .Q_err(lat, lon, depth)   error for each Q measurement 
     %
-    %   .lat   1D latitude array, degrees 
-    %   .lon   1D longitude array, degrees
+    %   .lats   1D latitude array, degrees 
+    %   .lons   1D longitude array, degrees
     %   .zs    1D depth array, in km
+    %
+    %   .nz, .nlat, .nlon integer values with the length of each lat, lon, zs array
+    %   .npts  integer values with total points (nz * nlat * nlon)
     %%%
     
     % The first set is the tomography model (vs and Q)
