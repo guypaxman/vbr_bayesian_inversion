@@ -1,4 +1,7 @@
 % a lower resolution for quick calculation
+addpath('./functions')
+addpath('./inv_functions')
+addpath('./GLAD25')
 
 % load in the observations, limited by spatial extent
 spatial_sampling.elim = -10;
