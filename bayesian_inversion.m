@@ -51,12 +51,13 @@ function bayesian_inversion(observations, vbr_predictions)
     ntype = 2; % number of observational datasets (Vs and Q)
     ndata = npts*ntype; % total data
 
+    % TO DO: move up to user-defined
     %  (1) Starting (X0) and Prior (Xpr) Models
     %  Let's assume X0 and Xpr are the same.
     phi0 = 0.01; % melt fraction
     g0 = log10(1000.); % 1 mm (1000 microns)
-    % g0 = 4000.; % 5 mm
 
+    % TO DO: switch following function to just make_X0
     [X0,iT,iphi,ig] = make_X0_xfit_premelt(vs,nz,nlat,nlon,nmod,npts,vs_vbr,phi0,g0,phi,g,T);
     Xpr = X0;
 
@@ -66,6 +67,8 @@ function bayesian_inversion(observations, vbr_predictions)
     %  (3) Make Covariance Matrices
     %      Data covariance matrix (Vd):
     Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
+    
+    % TO DO: move up std, lscale values to user-defined
     %      Model covariance matrix (Vm):
     std_T = ones(npts)*50.;
     std_phi = ones(npts)*0.0025;
@@ -110,10 +113,7 @@ function bayesian_inversion(observations, vbr_predictions)
         
         iphi0s = find(Xk1(iphi_idx)<0); % can't have negative melt
         Xk1(iphi_idx(iphi0s))=0.;
-        
-    %     ig0s = find(Xk1(ig_idx)<0.1e3); % can't have small grain size
-    %     Xk1(ig_idx(ig0s))=0.1e3;
-    %    
+
         % calculate misfit    
         [iTs,iphis,igs] = find_idx(Xk1,npts,nlat,nlon,nz,phi,g,T);
         yres = calc_yres(ndata,nlat,nlon,nz,iTs,iphis,igs,vs_vbr,lQ_vbr,vs,lQ);
@@ -143,7 +143,7 @@ function bayesian_inversion(observations, vbr_predictions)
     end
 
     %% EXTRACT OUTPUT
-
+    % TO DO: decide what in the following should be in the repository
     % Calculate the posterior distribution.
     mat1 = F'*Vdi*F;
     mat2 = Vmi;

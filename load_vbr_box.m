@@ -20,6 +20,7 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     %   .qmethod    the anelastic method, string  
     %%%
     
+    % TO DO: check for box_file, if it does not exist, run a sweep 
     load(box_file); % e.g., 'sweep_box.mat', containing a sweep structure
     params = make_param_grid(sweep.state_names, sweep);
     
@@ -27,7 +28,6 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     T = unique(params.T);
     phi = unique(params.phi);
     g = log10(unique(params.gs));
-    % g = unique(params.gs); %% linear grain size
     nT = length(T);
     nphi = length(phi);
     ng = length(g);
@@ -53,5 +53,5 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     vbr_predictions.T = T;
     vbr_predictions.g = g;
     vbr_predictions.qmethod = qmethod;
-    % NOTE: could save off these structures after they run so they are cached for reload
+    % TO DO:: could save off these structures after they run so they are cached for reload
 end 

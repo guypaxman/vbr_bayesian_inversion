@@ -12,6 +12,7 @@ function observations = load_data(spatial_sampling)
     %%%
     
     % The first set is the tomography model (vs and Q)
+    % TO DO: move these files up a level or consider a plugin-framework
     GLAD25_Vs = load('Vs_Model.mat');
     QL6_Q = load('QL6_Model.mat');
     lats = GLAD25_Vs.Vs_Model.Latitude;
@@ -41,6 +42,7 @@ function observations = load_data(spatial_sampling)
     observations.npts = observations.nlat*observations.nlon*observations.nz;
     observations.vs = vs;
     observations.Q = Q;
+    % TO DO: also user-defined, move up?
     observations.Q_err = ones(size(Q))*10.;
     observations.vs_err = ones(size(vs))*0.05;
     observations.lats = lats;
