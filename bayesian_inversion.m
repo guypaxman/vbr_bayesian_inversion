@@ -45,7 +45,7 @@ function bayesian_inversion(observations, vbr_predictions)
     %            for iz=1:nz ... Depth
     %  The order for the model parameters is T1, phi1, g1, T2, phi2, g2, ...
     %  Our total model space is (npts * number of physical parameters):
-    pars = ['T','phi','g'];    % set the free thermodynamic parameters in the inversion
+    pars = {'T'; 'phi'; 'g'};    % set the free thermodynamic parameters in the inversion
     npar = numel(pars); 
     nmod = npts*npar;
     ntype = 2; % number of observational datasets (Vs and Q)
