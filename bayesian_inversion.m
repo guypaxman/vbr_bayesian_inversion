@@ -45,7 +45,7 @@ function bayesian_inversion(observations, vbr_predictions)
     %            for iz=1:nz ... Depth
     %  The order for the model parameters is T1, phi1, g1, T2, phi2, g2, ...
     %  Our total model space is (npts * number of physical parameters):
-    pars = {'T'; 'phi'; 'g'};    % set the free thermodynamic parameters in the inversion
+    pars = ['T','phi','g'];    % set the free thermodynamic parameters in the inversion
     npar = numel(pars); 
     nmod = npts*npar;
     ntype = 2; % number of observational datasets (Vs and Q)
@@ -58,17 +58,14 @@ function bayesian_inversion(observations, vbr_predictions)
     g0 = log10(1000.); % 1 mm (1000 microns)
 
     % TO DO: switch following function to just make_X0
-    disp('building X0')
     [X0,iT,iphi,ig] = make_X0_xfit_premelt(vs,nz,nlat,nlon,nmod,npts,vs_vbr,phi0,g0,phi,g,T);
     Xpr = X0;
 
     %  (2) Frechet kernel (F) of the starting model
-    disp('building Frechet kernel')
     F = make_F(vs_vbr,lQ_vbr,nlat,nlon,nz,ndata,nmod,T,phi,g,iT,iphi,ig,nT,nphi,ng);
 
     %  (3) Make Covariance Matrices
     %      Data covariance matrix (Vd):
-    disp('building data covariance matrix')
     Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
     
     % TO DO: move up std, lscale values to user-defined
@@ -78,11 +75,9 @@ function bayesian_inversion(observations, vbr_predictions)
     std_g = ones(npts)*0.2; % log units
     % std_g = ones(npts)*2000; % linear units (microns)
     lscale = 200.; % km
-    disp('building model covariance matrix')
     Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod);
 
     %  (4) Residual (y - f(X))
-    disp('calculating initial residual')
     yres = calc_yres(ndata,nlat,nlon,nz,iT,iphi,ig,vs_vbr,lQ_vbr,vs,lQ);
 
     %% BEGIN INVERSION
@@ -100,9 +95,9 @@ function bayesian_inversion(observations, vbr_predictions)
     iphi_idx = (2:3:nmod);
     iT_idx = (1:3:nmod);
     ig_idx = (3:3:nmod);
-    disp('Beginning inversion')
+
     while irun == 1
-        disp(['Itration ', num2str(iter)])
+        
         % form inversion
 
         mat1 = F'*Vdi*F;
@@ -115,7 +110,7 @@ function bayesian_inversion(observations, vbr_predictions)
         matB = mat1-mat2;
         
         Xk1 = Xk + matA*matB;
-
+        
         iphi0s = find(Xk1(iphi_idx)<0); % can't have negative melt
         Xk1(iphi_idx(iphi0s))=0.;
 
@@ -123,7 +118,7 @@ function bayesian_inversion(observations, vbr_predictions)
         [iTs,iphis,igs] = find_idx(Xk1,npts,nlat,nlon,nz,phi,g,T);
         yres = calc_yres(ndata,nlat,nlon,nz,iTs,iphis,igs,vs_vbr,lQ_vbr,vs,lQ);
         chi2 = yres'*Vdi*yres/ndata;
-        display(['    Chi-Squared ',num2str(chi2),' for iteration ',num2str(iter)])
+        display(['Chi-Squared ',num2str(chi2),' for iteration ',num2str(iter)])
 
         max_iter = 1;
         chi_limit = 1;
