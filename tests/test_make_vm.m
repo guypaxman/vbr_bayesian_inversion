@@ -29,9 +29,9 @@ function [Vm, end_time] = call_make_vm()
     % tests are run from top-level, so this is relative to top.
     addpath('./inv_functions')
 
-    lons = linspace(-10, -80,3);
-    lats = linspace(56, 86, 4);
-    zs = linspace(50, 400, 5);
+    lons = linspace(-10, -80,4);
+    lats = linspace(56, 86, 5);
+    zs = linspace(50, 400, 6);
 
     npts = length(lons) * length(lats) * length(zs);
 
