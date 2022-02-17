@@ -1,4 +1,9 @@
 function [current_vals, diff_tolerances] = test_generate_parameter_sweep_HL()
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % test the parameter sweep generation (uses the VBRc)
+    %
+    % see test_make_vm.m for overview of required fields for the output here.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % set the tolerances for this test
     diff_tolerances = struct();
@@ -39,7 +44,7 @@ function [current_vals, diff_tolerances] = test_generate_parameter_sweep_HL()
         end
     end
 
-    current_vals.sweep = sweep;  % ({'output'; 'Vm'} will be used to access output.Vm
+    current_vals.sweep = sweep;
 
 end
 

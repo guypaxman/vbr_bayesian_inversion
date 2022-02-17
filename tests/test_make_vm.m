@@ -1,4 +1,48 @@
 function [current_vals, diff_tolerances] = test_make_vm()
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % retrieve results from make_Vm()
+    %
+    % Returns
+    % -------
+    % current_vals : struct
+    %    the results of calling the test function, must contain the following
+    %    fields:
+    %
+    %    .elapsed_time : scalar
+    %        the elapsed time of the function call in seconds
+    %    .arrays_to_compare  : cell array
+    %        a cell array with the nested field names pointing to the arrays to
+    %        run comparisons on. For example, with the following cell array:
+    %
+    %        arrays_to_compare = { ...
+    %                              {'output'; 'array_1'} ...
+    %                              {'output'; 'array_2'} ...
+    %                              {'output'; 'out_1'; 'array_3'} ...
+    %                            };
+    %
+    %        the test comparison will expect to the following arrays :
+    %
+    %               current_vals.output.array_1
+    %               current_vals.output.array_2
+    %               current_vals.out_1.array_3
+    %
+    %    .{array_fields}  : arrays
+    %         any of the array fields specified by .arrays_to_compare should
+    %         also be fields themselves.
+    %
+    % diff_tolerances : struct
+    %     the allowed tolerances for all array comparisons for this test, must
+    %     have the following fields:
+    %
+    %     .max_abs_diff : scalar
+    %         the max allowed difference in absolute value:
+    %             abs(expected - current)
+    %     .max_frac_diff : scalar
+    %         the max allowed fractional difference:
+    %             abs(expected - current)/expected
+    %         (values with zero in the denominator will be ignored).
+    %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % set the tolerances for this test
     diff_tolerances = struct();
