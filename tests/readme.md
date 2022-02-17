@@ -79,4 +79,8 @@ current_vals = load('./tests/testdata/test_make_vm_bad.mat');
 results = load('./tests/testdata/test_make_vm_comparison.mat');
 ```
 
-The `current_vals` structure will contain the data output for the current version of the code, the `results` structure will contain information on the comparison, including which arrays failed their checks. 
+The `current_vals` structure will contain the data output for the current version of the code, the `results` structure will contain information on the comparison, including which arrays failed their checks.
+
+## a note on test speed 
+
+While the tests do report elapsed time of tests, with differences from the references, these are not super useful unless the initial test already takes a long time.  

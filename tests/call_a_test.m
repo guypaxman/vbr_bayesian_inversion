@@ -42,14 +42,13 @@ function [time_diff, msg] = get_time_diff(expected_vals, current_vals, msg)
     time_diff.percent = frac * 100;
 
     if time_diff.absolute > 0
-        msg = [msg, ' but was '];
         slow_fast = 'slower';
     else
-        msg = [msg, ' and was '];
         slow_fast = 'faster';
     end
-    msg = [msg, num2str(abs(time_diff.absolute)), ' s ('];
-    msg = [msg, num2str(abs(time_diff.percent)), ' pct ) ', slow_fast];
+    msg = [msg, ' in ', num2str(current_vals.elapsed_time), ' s '];
+    msg = [msg, '(which is ',num2str(abs(time_diff.absolute)), ' s  or '];
+    msg = [msg, num2str(abs(time_diff.percent)), ' pct ', slow_fast, ')'];
 end
 
 function result = compare_answers(expected, current_vals, diff_tolerances)
