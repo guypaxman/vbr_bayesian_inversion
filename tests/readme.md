@@ -66,9 +66,13 @@ At this point, the new test function will automatically be picked up by `test_al
 
 ## trouble shooting failing tests
 
-If a test fails, the most important thing to do is understand why. Most likely, a failing test means that you made changes to the code that resulted in significant changes to the output. This is not necessarily **bad** -- if you are making changes for which you expect output to change, you can note that in a pull request and once the changes are merged, other developers can generate a new answer for the change.  
+A test can fail in at least two ways: the code may error or the comparison may fail. 
 
-That said, when a test fails, some information will be saved. For a failed test, two `.mat` files will be saved in `./tests/testdata`: one with a suffix `_bad.mat` and one with `_comparison.mat`. For example, if `test_make_vm` fails, you could load up the two files with:
+The testing framework does not attempt to catch errors, so if code changes cause an error, the test attempt also errors and you can debug as normal. If you are making changes to the arguments of a function, the test function will also need to be updated.
+
+If a test fails a comparison, it means the modified code ran successfully but it generates numerical differences above the test's tolerance. This is not **necessarily** bad, but it should be investigated. If you are making changes for which you expect output to change, you can note that in a pull request and once the changes are merged, other developers can generate a new answer for the change.  
+
+When a test fails a comparison, some information will be saved. For a failed test, two `.mat` files will be saved in `./tests/testdata`: one with a suffix `_bad.mat` and one with `_comparison.mat`. For example, if `test_make_vm` fails, you could load up the two files with:
 
 ```
 current_vals = load('./tests/testdata/test_make_vm_bad.mat');
