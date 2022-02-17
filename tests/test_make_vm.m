@@ -1,51 +1,37 @@
-function test_make_vm(store_answer)
-    % 
-    answer_file = 'test_make_vm.mat';
-    bad_file = 'test_make_vm_bad.mat';  % only saved if store_answer == 0 and test fails
-    diff_val_frac_tol = 1e-14;
-    
-    [Vm, end_time] = call_make_vm();  % go execute the code!
+function [current_vals, diff_tolerances] = test_make_vm()
 
-    time_diff_tol = -0.05;  % negative is slower
-    diff_val_tol = 1e-14;
+    % set the tolerances for this test
+    diff_tolerances = struct();
+    diff_tolerances.max_abs_diff = 1e-8;
+    diff_tolerances.max_frac_diff = 1e-10;
 
-    if store_answer==1
-        expected = struct();
-        expected.Vm = Vm;
-        expected.execution_time = end_time;
-        store_answer_file(answer_file, expected)
-    else
-        % reload the stored result 
-        expected = load_answer(answer_file);
+    % go execute the code!
+    [Vm, elapsed_time] = call_make_vm();
 
-        % calculate differences
-        diffvals = abs(Vm - expected.Vm)./Vm;
-        tdiff_abs = expected.execution_time - end_time;
-        tdiff_frac = tdiff_abs / expected.execution_time;
+    % store the results, including required fields (elapsed time, the
+    % array_comparisons cell array)
+    current_vals = struct();
+    current_vals.elapsed_time = elapsed_time;
 
-        if max(diffvals(:)) < diff_val_frac_tol
-            tpct = num2str(tdiff_frac * 100);
-            tda = num2str(tdiff_abs);
-            disp(['test_make_vm passed with dt of ', tda,' s (', tpct, ' percent)'])
-        else            
-            answer_file_bad = 'test_make_vm_bad.mat';
-            bad_answer.Vm = Vm;
-            bad_answer.execution_time = end_time;
-            save(answer_file_bad, '-struct', 'bad_answer')
-            error(['test_make_vm failed, check ', answer_file_bad]);
-        end
-    end
+    % the array_comparisons cell array is used to access nested fields in the
+    % structure. Each row refers to the nested order of access for the
+    % current_vals structure
+    current_vals.arrays_to_compare= { ...
+                                      {'output'; 'Vm'} ...
+                                    };
+    current_vals.output.Vm = Vm;  % ({'output'; 'Vm'} will be used to access output.Vm
     
 end 
 
 
 function [Vm, end_time] = call_make_vm()
 
-    addpath('./inv_functions')  % tests are run from top-level, so this is relative to top.
+    % tests are run from top-level, so this is relative to top.
+    addpath('./inv_functions')
 
-    lons = linspace(-10, -80,5);
-    lats = linspace(56, 86, 6);
-    zs = linspace(50, 400, 7);
+    lons = linspace(-10, -80,3);
+    lats = linspace(56, 86, 4);
+    zs = linspace(50, 400, 5);
 
     npts = length(lons) * length(lats) * length(zs);
 
