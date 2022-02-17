@@ -3,9 +3,8 @@ close all; clc
 % % Determine where your m-file's folder is.
 % folder = fileparts(which(mfilename)); 
 % Add that folder plus all subfolders to the path.
-addpath(genpath('/Users/Guy/Documents/MATLAB/VBR/vbr-0.99.2/'));
 addpath('./functions')
-
+initialize_vbr();
 %% THIS SCRIPT WILL GENERATE LOOK UP TABLES
 
 fileout = 'sweep_box.mat';

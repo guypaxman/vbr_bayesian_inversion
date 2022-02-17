@@ -2,6 +2,10 @@ function [current_vals, diff_tolerances] = test_load_vbr_box()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % retrieve results from load_vbr_box()
     %
+    % note that this requires an existing sweep on disk, which will be
+    % generated on the first run and saved in ./tests/testdata/. Subsequent
+    % runs will re-load that sweep, so only the `load_vbr_box` is timed here.
+    %
     % see test_make_vm for description of the output structures here.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

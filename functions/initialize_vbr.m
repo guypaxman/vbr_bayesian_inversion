@@ -13,7 +13,7 @@ function initialize_vbr()
     end
 
     if exist(vbr_path) ~= 7
-        display_no_dir_error()
+        display_no_dir_error(vbr_path)
     end
 
     addpath(vbr_path)
@@ -34,6 +34,6 @@ end
 
 
 function display_no_dir_error(vbr_path)
-    disp(["The supplied vbr path, ", vbr_path], " does not exist\n")
+    disp(["The supplied vbr path, ", vbr_path, " does not exist\n"])
     display_no_path_error()
 end
