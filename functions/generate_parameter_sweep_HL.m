@@ -153,12 +153,18 @@ n_gs     = numel(sweep_params.gs);
 n_z = numel(sweep_params.z);
 N_TOT = n_T*n_phi*n_gs;
 
+if isfield(sweep_params, 'verbose') == 0
+    sweep_params.verbose = 1;
+end
+
 
 i_state=1;
 for i_T = n_T:-1:1  % run backwards so structure is preallocated
     for i_phi = n_phi:-1:1
         for i_gs = n_gs:-1:1
-            disp([num2str(i_state),' of ',num2str(N_TOT)])
+            if sweep_params.verbose
+                disp([num2str(i_state),' of ',num2str(N_TOT)])
+            end
             % copy initial VBR structure and overwrite input state
             % variables for asthenospheric depth
             VBR = VBR_init;
