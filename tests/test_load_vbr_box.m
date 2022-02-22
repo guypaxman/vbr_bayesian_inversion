@@ -42,7 +42,7 @@ end
 function [output, end_time] = call_load_vbr(box_file)
     addpath('./functions')
     qmethod = "xfit_premelt";
-    observations.nz = 6; # match the sweep_params from initialize_sweep()
+    observations.nz = 6; % match the sweep_params from initialize_sweep()
     tic()
     output = load_vbr_box(box_file, qmethod, observations);
     end_time = toc();

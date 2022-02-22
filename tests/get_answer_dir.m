@@ -1,6 +1,6 @@
 function adir = get_answer_dir()
     adir = './tests/testdata/';
     if exist(adir) ~= 7
-        mdkir(adir)
+        mkdir(adir)
     end
 end 

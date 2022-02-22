@@ -7,7 +7,7 @@ Before running tests, you first have to store all the answers based on code you 
 
 ```
 addpath('./tests')
-store_all()ave
+store_all()
 ```
 
 This should run all the tests and store answers as `.mat` files in `tests/testdata/`. 
