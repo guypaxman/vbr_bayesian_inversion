@@ -1,10 +1,56 @@
-%% RUN A BAYESIAN INVERSION  
-%
-%  Here we will solve for the best T, phi, g for a given 
-%  tomography model using non-linear Bayesian inference
-
-
 function results = bayesian_inversion(bayesian_settings, observations, vbr_predictions)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Solve for the best T, phi, g for a given  tomography model using
+    % non-linear Bayesian inference.
+    %
+    % Parameters
+    % ----------
+    % bayesian_settings : struct
+    %   settings for the bayesian inversion. Required fields:
+    %   .phi0 : float
+    %       starting melt fraction
+    %   .g0 : float
+    %       starting log10(grain size in microns)
+    %   .std_T : float
+    %       temperature prior model standard deviation
+    %   .std_phi : float
+    %       melt fraction prior model standard deviation
+    %   .std_g : float
+    %       log10(grain size) prior model standard deviation
+    %   .lscale : float
+    %       distance scale (km) for covariance matrix
+    %
+    % observations : struct
+    %   tomography model observations of Vs and Q, see load_data() for
+    %   expected fields
+    %
+    % vbr_predictions : struct
+    %   the forward model for Vs and Q, see load_vbr_box() for expected
+    %   fields
+    %
+    % Returns
+    % -------
+    % results : struct
+    %    a structure containing all the bayesian results, with the
+    %    following fields:
+    %
+    %    .Vpo : array
+    %       the full covariance array
+    %    .Vpo_var : array
+    %       the diagonal of the full covariance array
+    %    .npar : int
+    %       the number of parameters in the inversion (2)
+    %    .Xk1_temp : array
+    %       the max likelihood for temperature, function of lat, lon and depth
+    %    .Xk1_phi : array
+    %       the max likelihood for melt fraction, function of lat, lon and depth
+    %    .Xk1_g : array
+    %       the max likelihood for log10(grain size), function of lat, lon and depth
+    %
+    % Notes
+    % -----
+    % grain size uses a log-normal distribution
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     addpath('./functions')
     addpath('./inv_functions')
@@ -56,7 +102,6 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     phi0 = bayesian_settings.phi0; % melt fraction
     g0 = bayesian_settings.g0; % grain size (in microns)
 
-    % TO DO: switch following function to just make_X0
     [X0,iT,iphi,ig] = make_X0(vs,nz,nlat,nlon,nmod,npts,vs_vbr,phi0,g0,phi,g,T);
     Xpr = X0;
 
@@ -68,9 +113,9 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
 
     %      Model covariance matrix (Vm):
-    std_T = ones(npts)*bayesian_settings.std_T;
-    std_phi = ones(npts)*bayesian_settings.std_phi;
-    std_g = ones(npts)*bayesian_settings.std_g; % log units
+    std_T = ones(npts) * bayesian_settings.std_T;
+    std_phi = ones(npts) * bayesian_settings.std_phi;
+    std_g = ones(npts) * bayesian_settings.std_g; % log units!!
     lscale = bayesian_settings.lscale; % km
     Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod);
 
@@ -148,10 +193,6 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     Vpo = matA\eye(nmod);
     Vpo_var = diag(Vpo);
 
-    results.Vpo = Vpo;
-    results.Vpo_var = Vpo_var;
-    results.npar = npar;
-
     % Extract maximum likelihood state variables as functions of lat, lon, z
     Xk1_temp = Xk1(iT_idx);
     Xk1_phi = Xk1(iphi_idx);
@@ -161,55 +202,12 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     Xk1_phi = permute(reshape(Xk1_phi,[nz,nlon,nlat]),[3 2 1]);
     Xk1_g = permute(reshape(Xk1_g,[nz,nlon,nlat]),[3 2 1]);
 
+    % store in the final structure to return
+    results.Vpo = Vpo;
+    results.Vpo_var = Vpo_var;
+    results.npar = npar;
     results.Xk1_temp =  Xk1_temp;
     results.Xk1_phi =  Xk1_phi;
     results.Xk1_g =  Xk1_g;
 
-    % also save some output
-    output_dir = bayesian_settings.output_dir;
-    if ~exist(output_dir,'dir')
-        mkdir(output_dir);
-    end
-    save_max_likelihood(output_dir, lats, lons, zs, results)
-
-    vpofile = [output_dir, '/Vpo.mat'];
-    disp(["saving Vpo_var to ", vpofile])
-    save(vpofile,'Vpo_var');
-
-    fullresults = [output_dir, '/bayes_results.mat'];
-    disp(["saving full bayesian inversion results to ", fullresults])
-    save(fullresults, '-struct', 'results')
-  
-end
-
-
-function save_max_likelihood(output_dir, lats, lons, depth, results)
-
-    fields_to_save = {'Xk1_temp'; 'Xk1_phi'; 'Xk1_g'};
-
-    % build a struct with field aliases for each field
-    % each one is {'fieldname'; 'structure_name'};
-    save_info.Xk1_temp = {'temperature'; 'Temp'};
-    save_info.Xk1_phi = {'meltfraction'; 'Phi'};
-    save_info.Xk1_g = {'grainsize'; 'GrainSize'};
-
-    for ifield = 1:numel(fields_to_save)
-        field = fields_to_save{ifield};
-
-        % (re)initialize the struct to save
-        OuterStruct = struct();
-        s_name = save_info.(field){2};
-        OuterStruct.(s_name) = struct();
-        OuterStruct.(s_name).latitude = lats;
-        OuterStruct.(s_name).longitude = lons;
-        OuterStruct.(s_name).depth = depth;
-
-        % add the field to save
-        fieldnametosave = save_info.(field){1};
-        OuterStruct.(s_name).(fieldnametosave) = results.(field);
-
-        filename = [output_dir, '/', s_name, '.mat'];
-        disp(['Saving max likelihood of ', fieldnametosave, ' to ', filename])
-        save(filename, '-struct', 'OuterStruct', s_name)
-    end
 end

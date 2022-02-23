@@ -27,23 +27,25 @@ bayesian_settings.std_T = 50.; % degree C
 bayesian_settings.std_phi = 0.0025; % melt fraction
 bayesian_settings.std_g = 0.2; % grain size in log units
 bayesian_settings.lscale = 200.; % distance scale, km
-bayesian_settings.output_dir = './results/state_variables_xfit_premelt';
 
 results = bayesian_inversion(bayesian_settings, observations, vbr_predictions);
-
 
 % Extract covariances for chosen sites
 lat_site1 = 78;
 lon_site1 = -42;
-Vpo_site1 = extract_site_covariance(results, observations, lat_site1, lon_site1, 1);
-save([bayesian_settings.output_dir, '/Vpo_site1.mat'], 'Vpo_site1')
+Vpo_site1 = extract_site_covariance(results, observations, lat_site1, lon_site1, 0);
 
 lat_site2 = 68;
 lon_site2 = -34;
-Vpo_site2 = extract_site_covariance(results, observations, lat_site2, lon_site2, 1);
-save([bayesian_settings.output_dir, '/Vpo_site2.mat'], 'Vpo_site2')
+Vpo_site2 = extract_site_covariance(results, observations, lat_site2, lon_site2, 0);
 
 lat_site3 = 66;
 lon_site3 = -48;
-Vpo_site3 = extract_site_covariance(results, observations, lat_site3, lon_site3, 1);
-save([bayesian_settings.output_dir, '/Vpo_site3.mat'], 'Vpo_site3')
+Vpo_site3 = extract_site_covariance(results, observations, lat_site3, lon_site3, 0);
+
+% save some output
+output_dir = './results/state_variables_xfit_premelt';
+save_bayes_results(output_dir, observations, results)
+save([output_dir, '/Vpo_site1.mat'], 'Vpo_site1')
+save([output_dir, '/Vpo_site2.mat'], 'Vpo_site2')
+save([output_dir, '/Vpo_site3.mat'], 'Vpo_site3')

@@ -1,6 +1,5 @@
 function vpo_site = extract_site_covariance(bayes_result, observations, latitude, longitude, exact_only)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %
     % extract the covariance from the bayesian inversion results for a specified
     % latitude and longitude.
     %
