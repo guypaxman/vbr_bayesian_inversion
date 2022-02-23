@@ -20,7 +20,7 @@ function vpo_site = extract_site_covariance(bayes_result, observations, latitude
     % Returns
     % -------
     % vpo_site : array
-    %    the covariance as a function of depth at the specified lat/lon.
+    %    the covariance at the specified lat/lon.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     lats = observations.lats;
@@ -40,11 +40,15 @@ function vpo_site = extract_site_covariance(bayes_result, observations, latitude
         ilon = find(dlon == min(dlon));
     end
 
-    ilat = npar*nz*nlon*(ilat-1);
-    ilon = npar*nz* ilon;
+    ilat = npar * nz * nlon * (ilat-1);
+    ilon = npar * nz * ilon;
 
     start_idx = ilat + ilon - npar * nz;
     end_idx = ilat + ilon;
+
+    % original:
+    % start_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*(find(lons==lon_site1)-1)) + 1;
+    % end_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*find(lons==lon_site1));
 
     vpo_site = bayes_result.Vpo(start_idx:end_idx, :);
 end
