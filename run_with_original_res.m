@@ -33,15 +33,15 @@ results = bayesian_inversion(bayesian_settings, observations, vbr_predictions);
 % Extract covariances for chosen sites
 lat_site1 = 78;
 lon_site1 = -42;
-Vpo_site1 = extract_site_covariance(results, observations, lat_site1, lon_site1, 0);
+Vpo_site1 = extract_site_covariance(results, observations, lat_site1, lon_site1, 1);
 
 lat_site2 = 68;
 lon_site2 = -34;
-Vpo_site2 = extract_site_covariance(results, observations, lat_site2, lon_site2, 0);
+Vpo_site2 = extract_site_covariance(results, observations, lat_site2, lon_site2, 1);
 
 lat_site3 = 66;
 lon_site3 = -48;
-Vpo_site3 = extract_site_covariance(results, observations, lat_site3, lon_site3, 0);
+Vpo_site3 = extract_site_covariance(results, observations, lat_site3, lon_site3, 1);
 
 % save some output
 output_dir = './results/state_variables_xfit_premelt';
