@@ -20,4 +20,30 @@ qmethod = 'xfit_premelt';     % Choose from xfit_premelt, xfit_mxw, eburgers_psp
 vbr_predictions = load_vbr_box('sweep_box.mat', qmethod, observations);
 
 % run the inversion
-bayesian_inversion(observations, vbr_predictions);
+% set the starting models for melt fraction and grain size
+bayesian_settings.phi0 = 0.01; % melt fraction
+bayesian_settings.g0 = log10(1000.); % 1 mm (1000 microns)
+bayesian_settings.std_T = 50.; % degree C
+bayesian_settings.std_phi = 0.0025; % melt fraction
+bayesian_settings.std_g = 0.2; % grain size in log units
+bayesian_settings.lscale = 200.; % distance scale, km
+bayesian_settings.output_dir = './results/state_variables_xfit_premelt';
+
+results = bayesian_inversion(bayesian_settings, observations, vbr_predictions);
+
+
+% Extract covariances for chosen sites
+lat_site1 = 78;
+lon_site1 = -42;
+Vpo_site1 = extract_site_covariance(results, observations, lat_site1, lon_site1, 1);
+save([bayesian_settings.output_dir, '/Vpo_site1.mat'], 'Vpo_site1')
+
+lat_site2 = 68;
+lon_site2 = -34;
+Vpo_site2 = extract_site_covariance(results, observations, lat_site2, lon_site2, 1);
+save([bayesian_settings.output_dir, '/Vpo_site2.mat'], 'Vpo_site2')
+
+lat_site3 = 66;
+lon_site3 = -48;
+Vpo_site3 = extract_site_covariance(results, observations, lat_site3, lon_site3, 1);
+save([bayesian_settings.output_dir, '/Vpo_site3.mat'], 'Vpo_site3')
