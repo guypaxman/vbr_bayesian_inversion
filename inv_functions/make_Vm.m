@@ -25,7 +25,7 @@ function Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod)
         co_g(isite, :) = std_g(isite, isite) .* (std_g(isite, :) .* fac);
     end
 
-    # now assemble into expected form. 
+    % now assemble into expected form.
     Vm = zeros(nmod); % nmod = npts * npar (npar == 3)
 
     % note that if npar is ever not 3, this will fail.
