@@ -5,43 +5,32 @@ function Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod)
     % make_Vm = model covariance matrix
     %
     % the final covariance matrix will have a size of (nmod, nmod) with
-    % covariances for each parameter (T, phi, g) arranged in internal blocks.
+    % covariances for (T, phi, g) arranged in internal 3x3 subblocks
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % get the cartesian grid at ever lat, lon zs permuation
     [X, Y, Z] = get_cartesian_grid(lats, lons, zs);
 
     % build the covariance matrix for each parameter
-    co_T = zeros(npts);
-    co_phi = zeros(npts);
-    co_g = zeros(npts);
-
-    for isite = 1:npts
-        d = get_dist(X(isite), Y(isite), Z(isite), X, Y, Z);
-        fac = transpose(exp(-abs(d)/lscale)(:));
-        std_facd =  std_T(isite, :) .* fac;
-        co_T(isite, :) = std_T(isite, isite) .* std_facd;
-        co_phi(isite, :) = std_phi(isite, isite) .* (std_phi(isite, :) .* fac);
-        co_g(isite, :) = std_g(isite, isite) .* (std_g(isite, :) .* fac);
-    end
-
-    % now assemble into expected form.
     Vm = zeros(nmod); % nmod = npts * npar (npar == 3)
 
-    % note that if npar is ever not 3, this will fail.
+    % get the columns for T, phi and g given the 3x3 subblocks
     npt_range = 1:npts;
-    icols = (npt_range - 1) * 3 + 1;
-    irows = (npt_range - 1) * 3 + 1;
-    Vm(irows, icols) = co_T;
+    icols_T = (npt_range - 1) * 3 + 1;
+    icols_phi = icols_T + 1;
+    icols_g = icols_T + 2;
 
-    icols = icols + 1;
-    irows = irows + 1;
-    Vm(irows, icols) = co_phi;
+    % for every site, calculate the covariance with all others, weighted by
+    % the distance between sites.
+    for isite = 1:npts
+        d = get_dist(X(isite), Y(isite), Z(isite), X, Y, Z);
+        fac = transpose(exp(-abs(d)/lscale)(:));  % the distance weighting
 
-    icols = icols + 1;
-    irows = irows + 1;
-    Vm(irows, icols) = co_g;
-
+        irow = (isite - 1) * 3 + 1;
+        Vm(irow, icols_T) = std_T(isite) .* std_T(isite, :) .* fac;
+        Vm(irow+1, icols_phi) = std_phi(isite) .* (std_phi(isite, :) .* fac);
+        Vm(irow+2, icols_g) = std_g(isite) .* (std_g(isite, :) .* fac);
+    end
 end
 
 function [X, Y, Z] = get_cartesian_grid(lats, lons, zs)
