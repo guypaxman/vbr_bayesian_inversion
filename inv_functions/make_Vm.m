@@ -24,7 +24,8 @@ function Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod)
     % the distance between sites.
     for isite = 1:npts
         d = get_dist(X(isite), Y(isite), Z(isite), X, Y, Z);
-        fac = transpose(exp(-abs(d)/lscale)(:));  % the distance weighting
+        fac = exp(-abs(d)/lscale); % the distance weighting with all other sites
+        fac = transpose(fac(:)); % unwrap to 1d and transpose 
 
         irow = (isite - 1) * 3 + 1;
         Vm(irow, icols_T) = std_T(isite) .* std_T(isite, :) .* fac;
