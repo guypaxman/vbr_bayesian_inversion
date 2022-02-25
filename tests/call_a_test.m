@@ -41,7 +41,7 @@ function [time_diff, msg] = get_time_diff(expected_vals, current_vals, msg)
     frac = time_diff.absolute / expected_vals.elapsed_time;
     time_diff.percent = frac * 100;
 
-    if time_diff.absolute > 0
+    if time_diff.absolute < 0
         slow_fast = 'slower';
     else
         slow_fast = 'faster';

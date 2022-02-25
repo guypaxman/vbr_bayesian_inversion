@@ -1,75 +1,67 @@
 %% INVERSION FUNCTIONS 4
 function Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% make_Vm = model covariance matrix
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %
+    % make_Vm = model covariance matrix
+    %
+    % the final covariance matrix will have a size of (nmod, nmod) with
+    % covariances for (T, phi, g) arranged in internal 3x3 subblocks
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    % get the cartesian grid at ever lat, lon zs permuation
+    [X, Y, Z] = get_cartesian_grid(lats, lons, zs);
 
-% make vectors of repeated lats and lons and zs
-vlats = zeros(npts,1);
-vlons = zeros(npts,1);
-vzs = zeros(npts,1);
-irow=1;
-for i=1:length(lats)
-    for j=1:length(lons)
-        for k=1:length(zs)
-            vlats(irow) = lats(i);
-            vlons(irow) = lons(j);
-            vzs(irow) = zs(k);
-            irow=irow+1;
-        end
-    end
-end                  
-            
-Vm = zeros(nmod);
+    % build the covariance matrix for each parameter
+    Vm = zeros(nmod); % nmod = npts * npar (npar == 3)
 
-for isite=1:npts
-    icol = 1;
-    for jsite=1:npts
-        irow = (isite-1)*3+1;
-        % each is a 3x3 subblock
-        d = get_dist(vlats(isite),vlats(jsite),vlons(isite),vlons(jsite),...
-            vzs(isite),vzs(jsite));
-        fac = exp(-abs(d)/lscale);
-        % T first:
-        val = std_T(isite)*std_T(jsite)*fac;
-        Vm(irow,icol) = val;
-        irow=irow+1;
-        icol=icol+1;
-        % phi second;
-        val = std_phi(isite)*std_phi(jsite)*fac;
-        Vm(irow,icol) = val;
-        irow=irow+1;
-        icol=icol+1;
-        % g third;
-        val = std_g(isite)*std_g(jsite)*fac;
-        Vm(irow,icol) = val;
-        icol=icol+1; 
+    % get the columns for T, phi and g given the 3x3 subblocks
+    npt_range = 1:npts;
+    icols_T = (npt_range - 1) * 3 + 1;
+    icols_phi = icols_T + 1;
+    icols_g = icols_T + 2;
+
+    % for every site, calculate the covariance with all others, weighted by
+    % the distance between sites.
+    for isite = 1:npts
+        d = get_dist(X(isite), Y(isite), Z(isite), X, Y, Z);
+        fac = exp(-abs(d)/lscale); % the distance weighting with all other sites
+        fac = transpose(fac(:)); % unwrap to 1d and transpose 
+
+        irow = (isite - 1) * 3 + 1;
+        Vm(irow, icols_T) = std_T(isite) .* std_T(isite, :) .* fac;
+        Vm(irow+1, icols_phi) = std_phi(isite) .* (std_phi(isite, :) .* fac);
+        Vm(irow+2, icols_g) = std_g(isite) .* (std_g(isite, :) .* fac);
     end
 end
 
+function [X, Y, Z] = get_cartesian_grid(lats, lons, zs)
+
+    % make vectors of repeated lats and lons and zs
+    [vlats, vlons, vzs] = ndgrid(lats, lons, zs);
+    vlats = permute(vlats, [3, 2, 1]);
+    vlons = permute(vlons, [3, 2, 1]);
+    vzs = permute(vzs, [3, 2, 1]);
+
+    % get the cartesian position of the full grid
+    [X, Y, Z] = geodesic_to_cart(vlats, vlons, vzs);
+
+end
+
+function [x, y, z] = geodesic_to_cart(lat, lon, depth)
+    % depth in km, lat/lon in deg
+    r = 6371. - depth;
+    x = r .* sind(90. - lat) .* cosd(lon);
+    y = r .* sind(90. - lat) .* sind(lon);
+    z = r .* cosd(90. - lat);
 end
 
 
+function d = get_dist(x1, y1, zz1, x2, y2, zz2)
 
-function d = get_dist(lat1,lat2,lon1,lon2,z1,z2)
-
-% z in km, lat/lon in deg
-r1 = 6371.-z1;
-r2 = 6371.-z2;
-x1 = r1*sind(90.-lat1)*cosd(lon1);
-y1 = r1*sind(90.-lat1)*sind(lon1);
-zz1 = r1*cosd(90.-lat1);
-x2 = r2*sind(90.-lat2)*cosd(lon2);
-y2 = r2*sind(90.-lat2)*sind(lon2);
-zz2 = r2*cosd(90.-lat2);
-
-dx = x2-x1;
-dy = y2-y1;
-dz = zz2-zz1;
-
-d = sqrt(dx*dx+dy*dy+dz*dz);
+    % get distance between the two points
+    dx = x2 - x1;
+    dy = y2 - y1;
+    dz = zz2 - zz1;
+    d = sqrt(dx.*dx+dy.*dy+dz.*dz);
 
 end
