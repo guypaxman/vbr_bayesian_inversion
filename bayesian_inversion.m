@@ -1,10 +1,56 @@
-%% RUN A BAYESIAN INVERSION  
-%
-%  Here we will solve for the best T, phi, g for a given 
-%  tomography model using non-linear Bayesian inference
-
-
-function bayesian_inversion(observations, vbr_predictions)
+function results = bayesian_inversion(bayesian_settings, observations, vbr_predictions)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Solve for the best T, phi, g for a given  tomography model using
+    % non-linear Bayesian inference.
+    %
+    % Parameters
+    % ----------
+    % bayesian_settings : struct
+    %   settings for the bayesian inversion. Required fields:
+    %   .phi0 : float
+    %       starting melt fraction
+    %   .g0 : float
+    %       starting log10(grain size in microns)
+    %   .std_T : float
+    %       temperature prior model standard deviation
+    %   .std_phi : float
+    %       melt fraction prior model standard deviation
+    %   .std_g : float
+    %       log10(grain size) prior model standard deviation
+    %   .lscale : float
+    %       distance scale (km) for covariance matrix
+    %
+    % observations : struct
+    %   tomography model observations of Vs and Q, see load_data() for
+    %   expected fields
+    %
+    % vbr_predictions : struct
+    %   the forward model for Vs and Q, see load_vbr_box() for expected
+    %   fields
+    %
+    % Returns
+    % -------
+    % results : struct
+    %    a structure containing all the bayesian results, with the
+    %    following fields:
+    %
+    %    .Vpo : array
+    %       the full covariance array
+    %    .Vpo_var : array
+    %       the diagonal of the full covariance array
+    %    .npar : int
+    %       the number of parameters in the inversion (2)
+    %    .Xk1_temp : array
+    %       the max likelihood for temperature, function of lat, lon and depth
+    %    .Xk1_phi : array
+    %       the max likelihood for melt fraction, function of lat, lon and depth
+    %    .Xk1_g : array
+    %       the max likelihood for log10(grain size), function of lat, lon and depth
+    %
+    % Notes
+    % -----
+    % grain size uses a log-normal distribution
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     addpath('./functions')
     addpath('./inv_functions')
@@ -51,14 +97,12 @@ function bayesian_inversion(observations, vbr_predictions)
     ntype = 2; % number of observational datasets (Vs and Q)
     ndata = npts*ntype; % total data
 
-    % TO DO: move up to user-defined
     %  (1) Starting (X0) and Prior (Xpr) Models
     %  Let's assume X0 and Xpr are the same.
-    phi0 = 0.01; % melt fraction
-    g0 = log10(1000.); % 1 mm (1000 microns)
+    phi0 = bayesian_settings.phi0; % melt fraction
+    g0 = bayesian_settings.g0; % grain size (in microns)
 
-    % TO DO: switch following function to just make_X0
-    [X0,iT,iphi,ig] = make_X0_xfit_premelt(vs,nz,nlat,nlon,nmod,npts,vs_vbr,phi0,g0,phi,g,T);
+    [X0,iT,iphi,ig] = make_X0(vs,nz,nlat,nlon,nmod,npts,vs_vbr,phi0,g0,phi,g,T);
     Xpr = X0;
 
     %  (2) Frechet kernel (F) of the starting model
@@ -67,14 +111,12 @@ function bayesian_inversion(observations, vbr_predictions)
     %  (3) Make Covariance Matrices
     %      Data covariance matrix (Vd):
     Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
-    
-    % TO DO: move up std, lscale values to user-defined
+
     %      Model covariance matrix (Vm):
-    std_T = ones(npts)*50.;
-    std_phi = ones(npts)*0.0025;
-    std_g = ones(npts)*0.2; % log units
-    % std_g = ones(npts)*2000; % linear units (microns)
-    lscale = 200.; % km
+    std_T = ones(npts) * bayesian_settings.std_T;
+    std_phi = ones(npts) * bayesian_settings.std_phi;
+    std_g = ones(npts) * bayesian_settings.std_g; % log units!!
+    lscale = bayesian_settings.lscale; % km
     Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod);
 
     %  (4) Residual (y - f(X))
@@ -151,26 +193,6 @@ function bayesian_inversion(observations, vbr_predictions)
     Vpo = matA\eye(nmod);
     Vpo_var = diag(Vpo);
 
-    % Extract covariances for chosen sites
-    lat_site1 = 78;
-    lon_site1 = -42;
-    % TO DO: make a function out of this
-    start_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*(find(lons==lon_site1)-1)) + 1;
-    end_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*find(lons==lon_site1));
-    Vpo_site1 = Vpo(start_idx1:end_idx1,:);
-
-    lat_site2 = 68;
-    lon_site2 = -34;
-    start_idx2 = (npar*nz*nlon*(find(lats==lat_site2)-1)) + (npar*nz*(find(lons==lon_site2)-1)) + 1;
-    end_idx2 = (npar*nz*nlon*(find(lats==lat_site2)-1)) + (npar*nz*find(lons==lon_site2));
-    Vpo_site2 = Vpo(start_idx2:end_idx2,:);
-
-    lat_site3 = 66;
-    lon_site3 = -48;
-    start_idx3 = (npar*nz*nlon*(find(lats==lat_site3)-1)) + (npar*nz*(find(lons==lon_site3)-1)) + 1;
-    end_idx3 = (npar*nz*nlon*(find(lats==lat_site3)-1)) + (npar*nz*find(lons==lon_site3));
-    Vpo_site3 = Vpo(start_idx3:end_idx3,:);
-
     % Extract maximum likelihood state variables as functions of lat, lon, z
     Xk1_temp = Xk1(iT_idx);
     Xk1_phi = Xk1(iphi_idx);
@@ -179,33 +201,13 @@ function bayesian_inversion(observations, vbr_predictions)
     Xk1_temp = permute(reshape(Xk1_temp,[nz,nlon,nlat]),[3 2 1]);
     Xk1_phi = permute(reshape(Xk1_phi,[nz,nlon,nlat]),[3 2 1]);
     Xk1_g = permute(reshape(Xk1_g,[nz,nlon,nlat]),[3 2 1]);
-            
-    Temp.latitude = lats;
-    Temp.longitude = lons;
-    Temp.depth = zs;
-    Temp.temperature = Xk1_temp;
 
-    Phi.latitude = lats;
-    Phi.longitude = lons;
-    Phi.depth = zs;
-    Phi.meltfraction = Xk1_phi;
+    % store in the final structure to return
+    results.Vpo = Vpo;
+    results.Vpo_var = Vpo_var;
+    results.npar = npar;
+    results.Xk1_temp =  Xk1_temp;
+    results.Xk1_phi =  Xk1_phi;
+    results.Xk1_g =  Xk1_g;
 
-    GrainSize.latitude = lats;
-    GrainSize.longitude = lons;
-    GrainSize.depth = zs;
-    GrainSize.grainsize = Xk1_g;
-
-    save_dir = ['results/', 'state_variables_', vbr_predictions.qmethod, '/'];
-    if ~exist(save_dir,'dir')
-        mkdir(save_dir);
-    end
-    
-    save([save_dir, 'Temp.mat'],'Temp');
-    save([save_dir, 'Phi.mat'],'Phi');
-    save([save_dir, 'GrainSize.mat'],'GrainSize');
-    save([save_dir, 'Vpo.mat'],'Vpo_var');
-    save([save_dir, 'Vpo_site1.mat'],'Vpo_site1');
-    save([save_dir, 'Vpo_site2.mat'],'Vpo_site2');
-    save([save_dir, 'Vpo_site3.mat'],'Vpo_site3');
-  
 end
