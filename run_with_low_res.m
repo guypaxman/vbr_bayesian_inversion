@@ -1,6 +1,5 @@
 % a lower resolution for quick calculation
-addpath('./functions')
-addpath('./inv_functions')
+addpath(genpath('./functions'))
 addpath('./GLAD25')
 
 % load in the observations, limited by spatial extent

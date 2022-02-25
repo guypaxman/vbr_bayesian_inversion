@@ -51,9 +51,6 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     % -----
     % grain size uses a log-normal distribution
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    addpath('./functions')
-    addpath('./inv_functions')
 
     % extract variables from observations structure
     vs = observations.vs;

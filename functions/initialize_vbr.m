@@ -1,5 +1,5 @@
 function initialize_vbr()
-
+    % ensure that the VBRc is in the working path
     vbr_path_file = './vbr_path.txt';
 
     if exist(vbr_path_file) == 2

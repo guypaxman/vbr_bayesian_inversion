@@ -74,8 +74,7 @@ end
 function [results_to_save, end_time] = call_bayesian_inversion()
 
     % tests are run from top-level, so this is relative to top.
-    addpath('./functions')
-    addpath('./inv_functions')
+    addpath(genpath('./functions'))
     addpath('./GLAD25')
 
 

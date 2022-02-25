@@ -40,7 +40,7 @@ end
 
 
 function [output, end_time] = call_load_vbr(box_file)
-    addpath('./functions')
+    addpath(genpath('./functions'))
     qmethod = "xfit_premelt";
     observations.nz = 6; % match the sweep_params from initialize_sweep()
     tic()
@@ -53,7 +53,7 @@ function initialize_sweep(box_file)
     % generate the sweep box if it does not exist locally. This is tested
     % separately from testing generate_parameter_sweep_HL
     if exist(box_file) ~= 2
-        addpath('./functions')
+        addpath(genpath('./functions'))
         initialize_vbr()
 
         sweep_params.per_bw_max = 0.8; % max period (s)

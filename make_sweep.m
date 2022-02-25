@@ -3,7 +3,7 @@ close all; clc
 % % Determine where your m-file's folder is.
 % folder = fileparts(which(mfilename)); 
 % Add that folder plus all subfolders to the path.
-addpath('./functions')
+addpath(genpath('./functions'))
 initialize_vbr();
 %% THIS SCRIPT WILL GENERATE LOOK UP TABLES
 

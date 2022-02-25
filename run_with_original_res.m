@@ -1,7 +1,6 @@
 % should exactly reproduce run_invert_xfit_premelt.m, with the caveat that the results
 % end up in results/state_variables_xfit_premelt/
-addpath('./functions')
-addpath('./inv_functions')
+addpath(genpath('./functions'))
 addpath('./GLAD25')
 
 % load in the observations, limited by spatial extent
