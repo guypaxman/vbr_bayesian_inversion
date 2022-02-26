@@ -55,9 +55,6 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     % extract variables from observations structure
     vs = observations.vs;
     Q = observations.Q;
-    lons = observations.lons;
-    lats = observations.lats;
-    zs = observations.zs;
     nlat = observations.nlat;
     nlon = observations.nlon;
     nz = observations.nz;
@@ -107,53 +104,30 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
 
     %  (3) Make Covariance Matrices
     %      Data covariance matrix (Vd):
-    Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
+    Vdi = get_Vd_inv(ndata,nlat,nlon,nz,lQ_err,vs_err); % calls make_Vd
 
     %      Model covariance matrix (Vm):
-    std_T = ones(npts) * bayesian_settings.std_T;
-    std_phi = ones(npts) * bayesian_settings.std_phi;
-    std_g = ones(npts) * bayesian_settings.std_g; % log units!!
-    lscale = bayesian_settings.lscale; % km
-    Vm = make_Vm(std_T,std_phi,std_g,lscale,lats,lons,zs,npts,nmod);
+    Vmi = get_VM(bayesian_settings, observations, npts, nmod);
 
     %  (4) Residual (y - f(X))
     yres = calc_yres(ndata,nlat,nlon,nz,iT,iphi,ig,vs_vbr,lQ_vbr,vs,lQ);
-
     %% BEGIN INVERSION
 
     %  Only Xk, F, and yres are updated in this scheme...
 
     irun = 1;
-    % invert some matrices:
-    Vdi = Vd\eye(ndata);
-    Vmi = Vm\eye(nmod);
     Xk = X0;
-
     iter=1;
-
-    iphi_idx = (2:3:nmod);
-    iT_idx = (1:3:nmod);
-    ig_idx = (3:3:nmod);
+    iphi_idx = (2:3:nmod);  % needed for the loop, so extract here
 
     while irun == 1
         
         % form inversion
+        % Xk1 = Xk + matA * matB
+        Xk1 = update_Xk1(Xk, F, Vdi, Vmi, yres, Xpr, nmod);
+        Xk1(Xk1(iphi_idx)<0)=0.; % can't have negative melt
 
-        mat1 = F'*Vdi*F;
-        mat2 = Vmi;
-        matA = mat1+mat2;
-        matA = matA\eye(nmod);
-        
-        mat1 = F'*Vdi*yres;
-        mat2 = Vmi*(Xk-Xpr);
-        matB = mat1-mat2;
-        
-        Xk1 = Xk + matA*matB;
-        
-        iphi0s = find(Xk1(iphi_idx)<0); % can't have negative melt
-        Xk1(iphi_idx(iphi0s))=0.;
-
-        % calculate misfit    
+        % calculate misfit
         [iTs,iphis,igs] = find_idx(Xk1,npts,nlat,nlon,nz,phi,g,T);
         yres = calc_yres(ndata,nlat,nlon,nz,iTs,iphis,igs,vs_vbr,lQ_vbr,vs,lQ);
         chi2 = yres'*Vdi*yres/ndata;
@@ -167,13 +141,12 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
             % update F
             F = make_F(vs_vbr,lQ_vbr,nlat,nlon,nz,ndata,nmod,...
                 T,phi,g,iTs,iphis,igs,nT,nphi,ng);
-
             % update model Xk
             Xk = Xk1;
             iter=iter+1;
         else 
             irun=0;
-            if (iter>=max_iter)
+            if ((iter>=max_iter) && (chi2 > chi_limit))
                 disp(['Did not converge after ' num2str(iter) ' iterations']);
             else
                 disp(['Converged to chi-squared < ' num2str(chi_limit) ' after ' num2str(iter) ' iterations']);
@@ -184,15 +157,14 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     %% EXTRACT OUTPUT
     % TO DO: decide what in the following should be in the repository
     % Calculate the posterior distribution.
-    mat1 = F'*Vdi*F;
-    mat2 = Vmi;
-    matA = mat1+mat2;
-    Vpo = matA\eye(nmod);
+    Vpo = get_Vpo(F, F', Vdi, Vmi, nmod);
     Vpo_var = diag(Vpo);
 
     % Extract maximum likelihood state variables as functions of lat, lon, z
+    iT_idx = (1:3:nmod);
+    ig_idx = (3:3:nmod);
     Xk1_temp = Xk1(iT_idx);
-    Xk1_phi = Xk1(iphi_idx);
+    Xk1_phi = Xk1(iphi_idx); % already pulled out iphi_idx above for the loop.
     Xk1_g = Xk1(ig_idx);
 
     Xk1_temp = permute(reshape(Xk1_temp,[nz,nlon,nlat]),[3 2 1]);
@@ -207,4 +179,60 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     results.Xk1_phi =  Xk1_phi;
     results.Xk1_g =  Xk1_g;
 
+end
+
+% the below functiosn split up all of the inversion steps into isolated functions
+% to help with memory usage. This ensures intermediate matrices are released from
+% memory when they are no longer needed.
+
+function Xk1 = update_Xk1(Xk, F, Vdi, Vmi, yres, Xpr, nmod)
+    matA_x_matB = get_matA_x_matB(F, Vdi, Vmi, yres, Xk, Xpr, nmod);
+    Xk1 = Xk + matA_x_matB;
+end
+
+
+function matA_x_matB = get_matA_x_matB(F, Vdi, Vmi, yres, Xk, Xpr, nmod)
+
+    F_t = F'; % store the transpose since we need it twice
+    matA =  get_Vpo(F, F_t, Vdi, Vmi, nmod);
+
+    mat1 = F_t*Vdi*yres;
+    mat2 = Vmi*(Xk-Xpr);
+    matB = mat1-mat2;
+
+    matA_x_matB = matA*matB;
+end
+
+
+function Vpo = get_Vpo(F, F_t, Vdi, Vmi, nmod)
+    % note: F_t = F'
+    matA = get_matA(F, F_t, Vdi, Vmi);
+    Vpo = matA\eye(nmod);  % this it the killer inversion
+end
+
+
+function matA = get_matA(F, F_t, Vdi, Vmi)
+    mat1 = F_t*Vdi*F;
+    mat2 = Vmi;
+    matA = mat1+mat2;
+end
+
+
+function Vmi = get_VM(bayesian_settings, observations, npts, nmod)
+    % isolate this here, so that we do not keep std_T, phi, g in memory more
+    % longer than neeeded
+    std_T = ones(npts) * bayesian_settings.std_T;
+    std_phi = ones(npts) * bayesian_settings.std_phi;
+    std_g = ones(npts) * bayesian_settings.std_g; % log units!!
+    lscale = bayesian_settings.lscale; % km
+    Vm = make_Vm(std_T, std_phi, std_g, lscale, ...
+                 observations.lats, observations.lons, observations.zs, ...
+                 npts, nmod);
+    % only the inverse is used, only return that to release the above from memory
+    Vmi = Vm\eye(nmod);
+end
+
+function Vdi = get_Vd_inv(ndata, nlat,nlon,nz,lQ_err,vs_err);
+    Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
+    Vdi = Vd\eye(ndata);
 end

@@ -1,13 +1,11 @@
 close all; clc
-
-% % Determine where your m-file's folder is.
-% folder = fileparts(which(mfilename)); 
-% Add that folder plus all subfolders to the path.
-addpath(genpath('./functions'))
-initialize_vbr();
 %% THIS SCRIPT WILL GENERATE LOOK UP TABLES
 
-fileout = 'sweep_box.mat';
+
+addpath(genpath('./functions'))
+initialize_vbr();  % adds the VBRc to the working path
+
+fileout = 'sweep_box.mat';  % the file to save the output to
 sweep_params.per_bw_max = 0.8; % max period (s)
 sweep_params.per_bw_min = 1.2; % min period (s)
 sweep_params.z = (40:10:400)*1000.; % depth (m)
@@ -23,7 +21,7 @@ sweep_params.phi = (0.0:0.0025:0.05); % melt fraction
 % sweep_params.gs = linspace(0.001,0.01,10)*1e6; % grain size [micrometres]
 % sweep_params.gs_params = struct('type','linear');
 % log:
-gsmin = 0.0001*1e6; gsmax = 0.01*1e6; gsref = 0.001*1e6; 
+gsmin = 0.0001*1e6; gsmax = 0.01*1e6; gsref = 0.001*1e6;
 sweep_params.gs = gsref * exp(linspace(log(gsmin/gsref),log(gsmax/gsref),21));
 sweep_params.gs_params = struct('type','log','gsmin',gsmin,'gsmax',gsmax,'gsref',gsref);
 

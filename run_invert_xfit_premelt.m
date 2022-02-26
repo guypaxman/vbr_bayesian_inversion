@@ -3,7 +3,7 @@
 %  Here we will solve for the best T, phi, g for a given 
 %  tomography model using non-linear Bayesian inference
 
-% TO DO: delete this file
+% TO DO: delete this file?
 
 clc
 clear
