@@ -71,7 +71,7 @@ end
 
 function [results_to_save, end_time] = call_extract_site_covariance()
 
-    addpath('./inv_functions')
+    addpath(genpath('./functions'))
     nz = 5;
     nlon = 7;
     nlat = 6;

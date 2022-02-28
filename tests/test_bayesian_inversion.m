@@ -74,10 +74,7 @@ end
 function [results_to_save, end_time] = call_bayesian_inversion()
 
     % tests are run from top-level, so this is relative to top.
-    addpath('./functions')
-    addpath('./inv_functions')
-    addpath('./GLAD25')
-
+    addpath(genpath('./functions'))
 
     % load in the observations, limited by spatial extent
     spatial_sampling.elim = -10;
@@ -88,7 +85,7 @@ function [results_to_save, end_time] = call_bayesian_inversion()
     spatial_sampling.z_start_index = 4; % remove top 3 slices (10, 20, 30 km)
     spatial_sampling.z_end_index = 40;
     spatial_sampling.z_res = 10; % depth sampling factor
-    observations = load_data(spatial_sampling);
+    observations = load_data(spatial_sampling, './GLAD25');
     % load in the vbr predictions for selected method
     qmethod = 'xfit_premelt';     % Choose from xfit_premelt, xfit_mxw, eburgers_psp, andrade_psp
     vbr_predictions = load_vbr_box('sweep_box.mat', qmethod, observations);

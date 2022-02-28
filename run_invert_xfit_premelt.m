@@ -3,10 +3,11 @@
 %  Here we will solve for the best T, phi, g for a given 
 %  tomography model using non-linear Bayesian inference
 
+% TO DO: delete this file?
+
 clc
 clear
-addpath('./functions')
-addpath('./inv_functions')
+addpath(genpath('./functions'))
 addpath('./GLAD25')
 
 %% INPUT FILES

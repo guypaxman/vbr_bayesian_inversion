@@ -1,6 +1,41 @@
-function observations = load_data(spatial_sampling)
+function observations = load_data(spatial_sampling, data_dir)
     %%%
-    % must return a structure with the following fields 
+    %
+    % This function loads in Q and Vs observations and associated data (see
+    % Return description for required fields). As written, it relies on
+    % finding the GLAD25-related model files, 'Vs_Model.mat' and 'QL6_Model.mat'.
+    % These files are not included in the repository (see the top level
+    % readme for informaiton on how to get them).
+    %
+    % Parameters
+    % ----------
+    % spatial_sampling : struct
+    %     a structure with information on sampling the observations. Fields
+    %     include:
+    %       .elim : float
+    %           eastern limit [decimal degrees; multiple of 0.5]
+    %       .wlim : float
+    %           western limit [decimal degrees; multiple of 0.5]
+    %       .nlim : float
+    %           nothern limit [decimal degrees; multiple of 0.5]
+    %       .slim : float
+    %           southern limit [decimal degrees; multiple of 0.5]
+    %       .xy_res : int
+    %           spatial resolution [decimal degrees; multiple of 0.5]
+    %       .z_start_index : int
+    %           index of the top depth [between 1 and 40].
+    %       .z_end_index : int
+    %           index of the bottom depth [between 1 and 40].
+    %       .z_res : int
+    %           depth sampling factor [each depth slice is 10 km].
+    %
+    % data_dir : string
+    %    the path where the GLAD25 data files reside
+    %
+    % Returns
+    % -------
+    % structure with the following fields:
+    %
     %   .vs(lat, lon, depth)  3D shear wave velocity in km/s
     %   .Q(lat, lon, depth)   3D quality factor
     %   .vs_err(lat, lon, depth)  error for each vs measurement
@@ -16,8 +51,8 @@ function observations = load_data(spatial_sampling)
     
     % The first set is the tomography model (vs and Q)
     % TO DO: move these files up a level or consider a plugin-framework
-    GLAD25_Vs = load('Vs_Model.mat');
-    QL6_Q = load('QL6_Model.mat');
+    GLAD25_Vs = load([data_dir, '/Vs_Model.mat']);
+    QL6_Q = load([data_dir, '/QL6_Model.mat']);
     lats = GLAD25_Vs.Vs_Model.Latitude;
     lons = GLAD25_Vs.Vs_Model.Longitude;
 

@@ -52,7 +52,7 @@ end
 function [sweep, end_time] = make_a_sweep()
 
     % tests are run from top-level, so this is relative to top.
-    addpath('./functions')
+    addpath(genpath('./functions'))
     initialize_vbr()
 
     tic();
