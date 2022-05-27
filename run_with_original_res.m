@@ -1,4 +1,4 @@
-% A high resolution bayesian inversion: You may %want to test out the lower
+% A high resolution bayesian inversion: You may want to test out the lower
 % resolution version, run_with_low_res.m, first.
 
 addpath(genpath('./functions'))

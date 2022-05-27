@@ -20,12 +20,11 @@ function sweep = generate_parameter_sweep_HL(sweep_params)
 %               gs              vector of grain sizes [micrometres]
 %               per_bw_max      maximum period (min. freq.) considered [s]
 %               per_bw_min      minimum period (max. freq.) considered [s]
-%               z               vector of depths [m] %%%% Added by HL
+%               z               vector of depths [m]
 %
 % Output:
 % -------
 %        sweep              structure with the following fields
-%               NO: z               vector of depths [m] --- removed by HL!
 %               VBR             structure of fixed values for the VBR
 %                               input, including information on assumed
 %                               pressure, stress, water content, density
@@ -47,15 +46,14 @@ function sweep = generate_parameter_sweep_HL(sweep_params)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 % construct state variable fields
-%%z = linspace(0,300,150)*1e3;  % change z into input choice
-z= sweep_params.z'; %% switched by HL to allow user to choose z array
+
+z= sweep_params.z'; % z array
 VBR.in.z = z;
 VBR.in.SV.P_GPa = z * 3300 * 9.8 /1e9;
-VBR.in.SV.sig_MPa = 0.1*ones(size(z));
-VBR.in.SV.Ch2o = zeros(size(z)); % in PPM!
-VBR.in.SV.rho = 3300 * ones(size(z)); % [Pa]
+VBR.in.SV.rho = 3300 * ones(size(z)); 
+VBR.in.SV.sig_MPa = 0.5*ones(size(z));
+VBR.in.SV.Ch2o = 100*ones(size(z));
 VBR.in.SV.chi = ones(size(z));
 VBR.in.SV.f = logspace(-2.2,-1.3,10);
 VBR.in.SV.T_K = (1450 + 273) * ones(size(z));
@@ -64,6 +62,7 @@ VBR.in.SV.dg_um = 1000 * ones(size(z));
 solidus_C = SoLiquidus(VBR.in.SV.P_GPa*1e9, zeros(size(z)),zeros(size(z)),...
     'hirschmann');
 VBR.in.SV.Tsolidus_K = solidus_C.Tsol + 273;
+
 % Note, the parameters that we are sweeping through will be 
 % overwritten in calculate_sweep()!
 
@@ -89,15 +88,12 @@ VBR.in.anelastic.methods_list = anelastic.possible_methods;
 sweepBox = calculate_sweep(VBR, sweep_params);
 
 sweep = sweep_params;
-sweep.z = VBR.in.z;  %% HL
+sweep.z = VBR.in.z;
 sweep.Box = sweepBox;
 sweep.VBR = VBR;
 sweep.P_GPa = VBR.in.SV.P_GPa;
 sweep.cH2O = VBR.in.SV.Ch2o;
 sweep.state_names = {'T', 'phi', 'gs'};
-
-
-
 
 end
 
@@ -157,9 +153,35 @@ if isfield(sweep_params, 'verbose') == 0
     sweep_params.verbose = 1;
 end
 
+% Constants for calculating pressure and density
+k0 = 130;            % GPa
+kT = 4.8;
+rho0 = 3330;         % kg/m3
+dT = 6;
+alpha0 = 2.832e-5;   % K-1
+alpha1 = 0.758e-8;   % K-2
+T0 = 273;            % K
+g = 9.81;
+V = 1:0.001:1.1;
+% Pressure
+P = k0 .* 1.5 .* (V.^(7/3) - V.^(5/3)) .* (1 + 0.75.*(kT-4).*(V.^(2/3) - 1));
+% Thermal expansivity
+alpha = V .* exp((dT + 1).*(1./V - 1));
 
 i_state=1;
 for i_T = n_T:-1:1  % run backwards so structure is preallocated
+    T = sweep_params.T(i_T) + 273;
+    rho = rho0 .* V .* (1 - (alpha .* (alpha0.*(T - T0) + alpha1/2.*(T^2 - T0^2)))); 
+    z_t = zeros(size(V));
+    for i = 2:numel(z_t)
+        z_t(i) = (((P(i) - P(i-1))*1e9 / (rho(i)*g))) + z_t(i-1);
+    end
+    z_t = z_t/1e3;
+    P_out = interp1(z_t,P,VBR_init.in.z);
+    rho_out = interp1(z_t,rho,VBR_init.in.z);
+    VBR.in.SV.P_GPa = P_out;
+    VBR.in.SV.rho = rho_out;
+
     for i_phi = n_phi:-1:1
         for i_gs = n_gs:-1:1
             if sweep_params.verbose
@@ -202,14 +224,13 @@ sweep.P_GPa = VBR.in.SV.P_GPa;
 sweep.cH2O = VBR.in.SV.Ch2o;
 sweep.state_names = {'T', 'phi', 'gs'};
 
-
 end
 
 function calculated_vals = extract_meanVs_Q(VBR, min_freq, max_freq)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% sweepBox = extract_meanVs_Q(VBR, min_freq, max_freq);
+% calculated_vals = extract_meanVs_Q(VBR, min_freq, max_freq);
 %
 % Calculates the mean Vs and Q at a range of depths for the initial VBR
 % values given

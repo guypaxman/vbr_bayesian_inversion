@@ -20,7 +20,7 @@ spatial_sampling.z_res = 1; % depth sampling factor
 observations = load_data(spatial_sampling, './GLAD25');
 
 % load in the vbr data for selected method
-qmethod = 'xfit_premelt';
+qmethod = 'xfit_premelt';     % Choose from xfit_premelt, xfit_mxw, eburgers_psp, andrade_psp
 vbr_predictions = load_vbr_box('sweep_box.mat', qmethod, observations);
 
 % run the inversion

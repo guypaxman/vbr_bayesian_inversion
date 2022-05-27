@@ -43,7 +43,7 @@ function vpo_site = extract_site_covariance(bayes_result, observations, latitude
     ilat = npar * nz * nlon * (ilat-1);
     ilon = npar * nz * ilon;
 
-    start_idx = ilat + ilon - npar * nz;
+    start_idx = ilat + ilon - npar * nz + 1;
     end_idx = ilat + ilon;
 
     % original:
