@@ -45,6 +45,6 @@ Vpo_site3 = extract_site_covariance(results, observations, lat_site3, lon_site3,
 % save some output
 output_dir = './results/state_variables_xfit_premelt';
 save_bayes_results(output_dir, observations, results)
-save([output_dir, '/Vpo_site1.mat'], 'Vpo_site1')
-save([output_dir, '/Vpo_site2.mat'], 'Vpo_site2')
-save([output_dir, '/Vpo_site3.mat'], 'Vpo_site3')
+save([output_dir, '/Vpo_site1.mat'], 'Vpo_site1', '-v7.3')
+save([output_dir, '/Vpo_site2.mat'], 'Vpo_site2', '-v7.3')
+save([output_dir, '/Vpo_site3.mat'], 'Vpo_site3', '-v7.3')

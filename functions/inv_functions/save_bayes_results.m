@@ -23,13 +23,13 @@ function save_bayes_results(output_dir, observations, results)
     save_max_likelihood(output_dir, lats, lons, zs, results)
 
     Vpo_var = results.Vpo_var;
-    vpofile = [output_dir, '/Vpo.mat'];
-    disp(["saving Vpo_var to ", vpofile])
-    save(vpofile,'Vpo_var');
+    vprofile = [output_dir, '/Vpo_var.mat'];
+    disp(["saving Vpo_var to ", vprofile])
+    save(vprofile,'Vpo_var','-v7.3');
 
     fullresults = [output_dir, '/bayes_results.mat'];
     disp(["saving full bayesian inversion results to ", fullresults])
-    save(fullresults, '-struct', 'results')
+    save(fullresults, '-struct', 'results', '-v7.3')
 end
 
 
@@ -60,6 +60,6 @@ function save_max_likelihood(output_dir, lats, lons, depth, results)
 
         filename = [output_dir, '/', s_name, '.mat'];
         disp(['Saving max likelihood of ', fieldnametosave, ' to ', filename])
-        save(filename, '-struct', 'OuterStruct', s_name)
+        save(filename, '-struct', 'OuterStruct', s_name, '-v7.3')
     end
 end

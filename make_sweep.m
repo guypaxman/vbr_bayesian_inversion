@@ -1,7 +1,6 @@
-close all; clc
 %% THIS SCRIPT WILL GENERATE LOOK UP TABLES
 
-
+close all; clc
 addpath(genpath('./functions'))
 initialize_vbr();  % adds the VBRc to the working path
 
@@ -25,6 +24,7 @@ gsmin = 0.0001*1e6; gsmax = 0.01*1e6; gsref = 0.001*1e6;
 sweep_params.gs = gsref * exp(linspace(log(gsmin/gsref),log(gsmax/gsref),21));
 sweep_params.gs_params = struct('type','log','gsmin',gsmin,'gsmax',gsmax,'gsref',gsref);
 
+
 % OPTION 2: QUICK TEST (10-ish min)
 %sweep_params.T = 1200:50:1800; %[degrees C]
 %sweep_params.phi = (0.0:0.005:0.05); % melt fraction
@@ -36,7 +36,7 @@ sweep_params.gs_params = struct('type','log','gsmin',gsmin,'gsmax',gsmax,'gsref'
 % sweep_params.phi = (0.0:0.01:0.05); % melt fraction
 % sweep_params.gs = linspace(0.001,0.01,4)*1e6; % grain size [micrometres]
 
-sweep = generate_parameter_sweep_HL(sweep_params);
+sweep = generate_parameter_sweep_bayes(sweep_params);
 
 save(fileout,'sweep');
 

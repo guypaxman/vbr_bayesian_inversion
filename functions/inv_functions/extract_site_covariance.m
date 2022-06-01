@@ -46,9 +46,5 @@ function vpo_site = extract_site_covariance(bayes_result, observations, latitude
     start_idx = ilat + ilon - npar * nz + 1;
     end_idx = ilat + ilon;
 
-    % original:
-    % start_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*(find(lons==lon_site1)-1)) + 1;
-    % end_idx1 = (npar*nz*nlon*(find(lats==lat_site1)-1)) + (npar*nz*find(lons==lon_site1));
-
     vpo_site = bayes_result.Vpo(start_idx:end_idx, :);
 end

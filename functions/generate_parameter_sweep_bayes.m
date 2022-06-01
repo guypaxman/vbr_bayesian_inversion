@@ -1,7 +1,7 @@
-function sweep = generate_parameter_sweep_HL(sweep_params)
+function sweep = generate_parameter_sweep_bayes(sweep_params)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% sweep = generate_parameter_sweep(sweep_params);
+% sweep = generate_parameter_sweep_bayes(sweep_params);
 %
 % Calculates the mean Vs and Q at a range of depths for a combination of
 % VBR input parameters (temperature, melt fraction, and grain size) across
@@ -116,7 +116,7 @@ function [sweepBox] = calculate_sweep(VBR_init, sweep_params)
 %               gs              vector of grain sizes [micrometres]
 %               per_bw_max      maximum period (min. freq.) considered [s]
 %               per_bw_min      minimum period (max. freq.) considered [s]
-%               z               array of z, added by HL
+%               z               array of z
 %
 %       VBR                 structure of fixed values for the VBR input
 %                           including information on assumed pressure, 
@@ -154,6 +154,7 @@ if isfield(sweep_params, 'verbose') == 0
 end
 
 % Constants for calculating pressure and density
+% (Grose & Alfonso, 2013; G-Cubed)
 k0 = 130;            % GPa
 kT = 4.8;
 rho0 = 3330;         % kg/m3

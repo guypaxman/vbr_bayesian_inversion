@@ -111,6 +111,7 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
 
     %  (4) Residual (y - f(X))
     yres = calc_yres(ndata,nlat,nlon,nz,iT,iphi,ig,vs_vbr,lQ_vbr,vs,lQ);
+    
     %% BEGIN INVERSION
 
     %  Only Xk, F, and yres are updated in this scheme...
@@ -155,9 +156,11 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
     end
 
     %% EXTRACT OUTPUT
-    % TO DO: decide what in the following should be in the repository
+
     % Calculate the posterior distribution.
     Vpo = get_Vpo(F, F', Vdi, Vmi, nmod);
+    
+    % Extract the diagonal (variances)
     Vpo_var = diag(Vpo);
 
     % Extract maximum likelihood state variables as functions of lat, lon, z
@@ -181,7 +184,7 @@ function results = bayesian_inversion(bayesian_settings, observations, vbr_predi
 
 end
 
-% the below functiosn split up all of the inversion steps into isolated functions
+% the below functions split up all of the inversion steps into isolated functions
 % to help with memory usage. This ensures intermediate matrices are released from
 % memory when they are no longer needed.
 
@@ -220,7 +223,7 @@ end
 
 function Vmi = get_VM(bayesian_settings, observations, npts, nmod)
     % isolate this here, so that we do not keep std_T, phi, g in memory more
-    % longer than neeeded
+    % longer than needed
     std_T = ones(npts) * bayesian_settings.std_T;
     std_phi = ones(npts) * bayesian_settings.std_phi;
     std_g = ones(npts) * bayesian_settings.std_g; % log units!!
@@ -232,7 +235,7 @@ function Vmi = get_VM(bayesian_settings, observations, npts, nmod)
     Vmi = Vm\eye(nmod);
 end
 
-function Vdi = get_Vd_inv(ndata, nlat,nlon,nz,lQ_err,vs_err);
+function Vdi = get_Vd_inv(ndata, nlat,nlon,nz,lQ_err,vs_err)
     Vd = make_Vd(ndata,nlat,nlon,nz,lQ_err,vs_err);
     Vdi = Vd\eye(ndata);
 end

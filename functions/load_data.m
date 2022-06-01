@@ -5,7 +5,7 @@ function observations = load_data(spatial_sampling, data_dir)
     % Return description for required fields). As written, it relies on
     % finding the GLAD25-related model files, 'Vs_Model.mat' and 'QL6_Model.mat'.
     % These files are not included in the repository (see the top level
-    % readme for informaiton on how to get them).
+    % readme for information on how to get them).
     %
     % Parameters
     % ----------
@@ -80,7 +80,6 @@ function observations = load_data(spatial_sampling, data_dir)
     observations.npts = observations.nlat*observations.nlon*observations.nz;
     observations.vs = vs;
     observations.Q = Q;
-    % TO DO: also user-defined, move up?
     observations.Q_err = ones(size(Q))*10.;
     observations.vs_err = ones(size(vs))*0.05;
     observations.lats = lats;

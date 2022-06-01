@@ -1,4 +1,4 @@
-function [current_vals, diff_tolerances] = test_generate_parameter_sweep_HL()
+function [current_vals, diff_tolerances] = test_generate_parameter_sweep_bayes()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % test the parameter sweep generation (uses the VBRc)
     %
@@ -64,7 +64,7 @@ function [sweep, end_time] = make_a_sweep()
     sweep_params.phi = (0.0:0.01:0.02); % melt fraction
     sweep_params.gs = linspace(0.001,0.01,4)*1e6; % grain size [micrometres]
     sweep_params.verbose = 0;
-    sweep = generate_parameter_sweep_HL(sweep_params);
+    sweep = generate_parameter_sweep_bayes(sweep_params);
 
     end_time = toc();
 

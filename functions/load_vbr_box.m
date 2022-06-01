@@ -20,7 +20,6 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     %   .qmethod    the anelastic method, string  
     %%%
     
-    % TO DO: check for box_file, if it does not exist, run a sweep 
     load(box_file); % e.g., 'sweep_box.mat', containing a sweep structure
     params = make_param_grid(sweep.state_names, sweep);
     
@@ -38,7 +37,6 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     for iT=1:nT
         for iphi=1:nphi
             for ig=1:ng
-                % NOTE: should be able to remove vectorize the z loop here at least.
                 for iz=1:nz
                     vs_vbr(iz,iT,iphi,ig) = sweep.Box(iT,iphi,ig).(qmethod).Vs(iz)*1.e-3; % km/s
                     Q_vbr(iz,iT,iphi,ig) = sweep.Box(iT,iphi,ig).(qmethod).Q(iz);
@@ -53,5 +51,4 @@ function vbr_predictions = load_vbr_box(box_file, qmethod, observations)
     vbr_predictions.T = T;
     vbr_predictions.g = g;
     vbr_predictions.qmethod = qmethod;
-    % TO DO:: could save off these structures after they run so they are cached for reload
 end 

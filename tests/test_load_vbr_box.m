@@ -51,7 +51,7 @@ end
 
 function initialize_sweep(box_file)
     % generate the sweep box if it does not exist locally. This is tested
-    % separately from testing generate_parameter_sweep_HL
+    % separately from testing generate_parameter_sweep_bayes
     if exist(box_file) ~= 2
         addpath(genpath('./functions'))
         initialize_vbr()
@@ -63,7 +63,7 @@ function initialize_sweep(box_file)
         sweep_params.phi = (0.0:0.01:0.02); % melt fraction
         sweep_params.gs = linspace(0.001,0.01,4)*1e6; % grain size [micrometres]
         sweep_params.verbose = 0;
-        sweep = generate_parameter_sweep_HL(sweep_params);
+        sweep = generate_parameter_sweep_bayes(sweep_params);
 
         save(box_file, 'sweep')
     end
