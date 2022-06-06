@@ -57,7 +57,7 @@ call_a_test('test_a_new_thing', store_test)
 to store the answer, after which
 
 ```
-call_a_test('test_a_new_thing', store_test)
+call_a_test('test_a_new_thing', 0)
 ```
 
 should run the comparison to the answer you just stored. 
